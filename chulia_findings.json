@@ -126,7 +126,8 @@
         "pathConstraints": true
       },
       "ID": 1,
-      "description": "This malicious flow leaks the recipient or sender of an sms text message and posts it to an HTTP Server"
+      "description": "This malicious flow leaks the recipient or sender of an sms text message and posts it to an HTTP Server",
+      "isNegative": false
     },
     {
       "source": {
@@ -230,7 +231,8 @@
         "pathConstraints": true
       },
       "ID": 2,
-      "description": "This malicious flow leaks the location of the android device and posts it to an HTTP Server"
+      "description": "This malicious flow leaks the location of the android device and posts it to an HTTP Server",
+      "isNegative": false
     },
     {
       "source": {
@@ -355,7 +357,152 @@
         "pathConstraints": true
       },
       "ID": 3,
-      "description": "This malicious flow leaks contacts and posts it to an HTTP server."
+      "description": "This malicious flow leaks contacts and posts it to an HTTP server.",
+      "isNegative": false
+    },
+    {
+      "source": {
+        "targetName": "query",
+        "targetNo": 1,
+        "statement": "Cursor query = getContentResolver().query(Calls.CONTENT_URI, new String[]{\"number\", \"name\", \"type\", \"date\", \"duration\"}, null, null, \"date DESC\");",
+        "methodName": "private String getRecord()",
+        "className": "com.google.services.AlarmService",
+        "lineNo": 266,
+        "IRs": [
+          {
+            "type": "Jimple",
+            "IRstatement": "$r5 = virtualinvoke $r2.<android.content.ContentResolver: android.database.Cursor query(android.net.Uri,java.lang.String[],java.lang.String,java.lang.String[],java.lang.String)>($r3, $r4, null, null, \"date DESC\")"
+          }
+        ]
+      },
+      "sink": {
+        "targetName": "execute",
+        "targetNo": 1,
+        "statement": "if (defaultHttpClient.execute(httpPost).getStatusLine().getStatusCode() == 200) {",
+        "methodName": "public synchronized void run(String str, String str2)",
+        "className": "com.google.services.SendInfo",
+        "lineNo": 189,
+        "IRs": [
+          {
+            "type": "Jimple",
+            "IRstatement": "$r11 = virtualinvoke $r8.<org.apache.http.impl.client.DefaultHttpClient: org.apache.http.HttpResponse execute(org.apache.http.client.methods.HttpUriRequest)>($r3)"
+          }
+        ]
+      },
+      "intermediateFlows": [
+        {
+          "statement": "String string2 = query.getString(PHONES_NUMBER_INDEX);",
+          "methodName": "private String getRecord()",
+          "className": "com.google.services.AlarmService",
+          "lineNo": 273,
+          "ID": 1
+        },
+        {
+          "statement": "stringBuilder.append(string2 + \",电话号码：\");",
+          "methodName": "private String getRecord()",
+          "className": "com.google.services.AlarmService",
+          "lineNo": 281,
+          "ID": 2
+        },
+        {
+          "statement": "return stringBuilder.toString();",
+          "methodName": "private String getRecord()",
+          "className": "com.google.services.AlarmService",
+          "lineNo": 291,
+          "ID": 3
+        },
+        {
+          "statement": "str = getRecord();",
+          "methodName": "public void onCreate()",
+          "className": "com.google.services.AlarmService",
+          "lineNo": 87,
+          "ID": 4
+        },
+        {
+          "statement": "bundle.putString(\"other\", str);",
+          "methodName": "public void onCreate()",
+          "className": "com.google.services.AlarmService",
+          "lineNo": 91,
+          "ID": 5
+        },
+        {
+          "statement": "intent.putExtras(bundle);",
+          "methodName": "public void onCreate()",
+          "className": "com.google.services.AlarmService",
+          "lineNo": 92,
+          "decompiledSourceLineNo": 75,
+          "ID": 6
+        },
+        {
+          "statement": "sendBroadcast(intent);",
+          "methodName": "public void onCreate()",
+          "className": "com.google.services.AlarmService",
+          "lineNo": 93,
+          "decompiledSourceLineNo": 76,
+          "ID": 7
+        },
+        {
+          "statement": "Bundle extras = intent.getExtras();",
+          "methodName": "public void onReceive(Context context, Intent intent)",
+          "className": "com.google.services.sendReceiver",
+          "lineNo": 17,
+          "ID": 8
+        },
+        {
+          "statement": "} else if (extras.containsKey(\"other\")) {",
+          "methodName": "public void onReceive(Context context, Intent intent)",
+          "className": "com.google.services.sendReceiver",
+          "lineNo": 45,
+          "ID": 9
+        },
+        {
+          "statement": "this.value = extras.get(\"other\").toString();",
+          "methodName": "public void onReceive(Context context, Intent intent)",
+          "className": "com.google.services.sendReceiver",
+          "lineNo": 48,
+          "ID": 10
+        },
+        {
+          "statement": "this.sender.sendInfo(this.name, this.value);",
+          "methodName": "public void onReceive(Context context, Intent intent)",
+          "className": "com.google.services.sendReceiver",
+          "lineNo": 50,
+          "decompiledSourceLineNo": 39,
+          "ID": 11
+        },
+        {
+          "statement": "run(str, str2);",
+          "methodName": "public boolean sendInfo(String str, String str2)",
+          "className": "com.google.services.SendInfo",
+          "lineNo": 44,
+          "ID": 12
+        },
+        {
+          "statement": "arrayList.add(new BasicNameValuePair(str.toString(), str2.toString()));",
+          "methodName": "public synchronized void run(String str, String str2)",
+          "className": "com.google.services.SendInfo",
+          "lineNo": 177,
+          "ID": 13
+        },
+        {
+          "statement": "httpPost.setEntity(new UrlEncodedFormEntity(arrayList, \"UTF-8\"));",
+          "methodName": "public synchronized void run(String str, String str2)",
+          "className": "com.google.services.SendInfo",
+          "lineNo": 184,
+          "ID": 14
+        }
+      ],
+      "description": "This malicious flow leaks phone number to a remote server. It reads first read the phone number in AlarmService class, later puts this information into a intent and starts a BroadcastReceiver sendReceiver. ",
+      "isNegative": false,
+      "attributes": {
+        "lifecycle": true,
+        "nonStaticField": true,
+        "collections": true,
+        "pathConstraints": true,
+        "interComponentCommunication": true,
+        "appendToString": true
+      },
+      "ID": 4
     }
   ]
 }
