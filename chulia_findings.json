@@ -162,7 +162,7 @@
         {
           "statement": "AlarmService.this.updateWithNewLocation(location);",
           "methodName": "public void onLocationChanged(Location location)",
-          "className": "com.google.services.AlarmService",
+          "className": "com.google.services.AlarmService.AnonymousClass1",
           "lineNo": 175,
           "ID": 1
         },
